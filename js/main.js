@@ -1,1 +1,4 @@
-alert("hi")
+
+function clickMe(){
+	console.log("hey")
+}
