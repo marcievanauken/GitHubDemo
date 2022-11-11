@@ -1,4 +1,5 @@
 
 function clickMe(){
-	console.log("hey")
+	console.log("hey");
+	document.getElementById('joined').style.display = 'block';
 }
