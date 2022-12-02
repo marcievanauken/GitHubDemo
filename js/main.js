@@ -1,10 +1,21 @@
 function gd(){
 	getGifts(endpoint, timeParams);
-	validateGifts(gifts, dbLengths);
+	truncateGifts(gifts, dbLengths);
 	insertGifts(gifts);
 }
 
-function validateGifts(gifts, dbLengths){
+function truncateGifts(gifts, dbLengths){
 	console.log(dbLengths);
-	// loop through gifts
+	for (gift in gifts){
+		/* 
+			//general validation checks
+			//validations and regex etc
+
+		*/
+
+		if (gift[i].lengthTooLong){
+			truncateVals(gift);
+		}
+	}
+
 }
