@@ -11,7 +11,7 @@ function truncateGifts(gifts, dbLengths){
 	for (gift in gifts){
 		gift.lengthTooLong = true;
 		if (gifts[gift].lengthTooLong){
-			truncateVals(gift);
+			truncateValues(gift);
 		}
 	}
 }
