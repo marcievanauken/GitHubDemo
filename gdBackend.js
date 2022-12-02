@@ -16,6 +16,8 @@ function truncateGifts(gifts, dbLengths){
 		if (gift[i].lengthTooLong){
 			truncateVals(gift);
 		}
+
+		//adding some code
 	}
 
 }
