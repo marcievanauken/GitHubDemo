@@ -16,4 +16,6 @@ function truncateGifts(gifts, dbLengths){
 	}
 }
 
+// testing merging into master locally with branch rules
+
 gdProcess();
