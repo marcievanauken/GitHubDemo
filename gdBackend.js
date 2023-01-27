@@ -15,7 +15,7 @@ function truncateGifts(gifts, dbLengths){
 		}
 	}
 }
-//changing
+// vanaukenmarcie is making changes
 
 // making changes to code, testing on PR creation assign reviewer
 
