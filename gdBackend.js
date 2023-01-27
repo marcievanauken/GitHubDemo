@@ -15,5 +15,8 @@ function truncateGifts(gifts, dbLengths){
 		}
 	}
 }
+//changing
+
+// making changes to code, testing on PR creation assign reviewer
 
 gdProcess();
