@@ -1,4 +1,8 @@
-on: [push]
+name: Create Issue Branch
+run-name: ${{ github.actor }} created an Issue
+on:
+  issues:
+    types: [ assigned ]
 
 jobs:
   hello_world_job:
