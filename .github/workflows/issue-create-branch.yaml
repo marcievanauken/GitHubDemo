@@ -5,13 +5,16 @@ on:
     types: [ assigned ]
 
 jobs:
-  create_issue_branch_job:
+  create-issue-branch:
     runs-on: ubuntu-latest
     steps:
       - name: Create Issue Branch
         uses: robvanderleek/create-issue-branch@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  output-branch-name:
+    runs-on: ubuntu-latest
+    steps:
       - name: Output
       - run: echo ${{ steps.create-issue-branch.outputs.branchName }}
         
