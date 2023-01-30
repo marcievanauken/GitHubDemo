@@ -1,0 +1,23 @@
+{
+  "name": "githubdemo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "gdBackend.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marcievanauken/GitHubDemo.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/marcievanauken/GitHubDemo/issues"
+  },
+  "homepage": "https://github.com/marcievanauken/GitHubDemo#readme",
+  "dependencies": {
+    "@actions/core": "^1.10.0",
+    "@actions/github": "^5.1.1"
+  }
+}
