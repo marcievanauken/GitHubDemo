@@ -12,5 +12,6 @@ jobs:
         uses: robvanderleek/create-issue-branch@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: echo ${{ issue }}
+      - name: Output
+      - run: echo ${{ steps.create-issue-branch.outputs.branchName }}
         
