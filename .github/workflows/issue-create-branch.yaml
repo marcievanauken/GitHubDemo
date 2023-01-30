@@ -1,3 +1,5 @@
+name: Create Issue Branch
+run-name: ${{ github.actor }} created an Issue
 on:
   issues:
     types: [ assigned ]
@@ -8,5 +10,7 @@ jobs:
     steps:
       - name: Create Issue Branch
         uses: robvanderleek/create-issue-branch@main
+        run: echo ${{issue}}
+        branchName: '${issue.number}-${issue.title}'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
