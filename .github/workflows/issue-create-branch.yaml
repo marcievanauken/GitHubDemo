@@ -13,5 +13,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Name Branch
-        branchName: '${issue.number}-${issue.title}'
+        BRANCH_NAME: '${issue.number}-${issue.title}'
         run: echo ${{issue}}
