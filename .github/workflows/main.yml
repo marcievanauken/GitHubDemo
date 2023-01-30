@@ -7,7 +7,7 @@ jobs:
     steps:
       - name: Hello world action step
         id: hello
-        uses: marcievanauken/GitHubDemo
+        uses: marcievanauken/GitHubDemo@4da2e7eb0a2b5387d6da5948d5475a5c06085c7c
         with:
           who-to-greet: 'Mona the Octocat'
       # Use the output from the `hello` step
