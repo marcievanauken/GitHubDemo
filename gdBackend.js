@@ -15,7 +15,6 @@ function truncateGifts(gifts, dbLengths){
 		}
 	}
 }
-
-// testing merging into master locally with branch rules
+// vanaukenmarcie is making changes
 
 gdProcess();
