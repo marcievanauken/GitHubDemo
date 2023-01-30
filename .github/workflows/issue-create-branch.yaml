@@ -9,18 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Create Issue Branch
-        uses: robvanderleek/create-issue-branch@main #have to pay for this for paid orgs - to find diff one?
+        uses: robvanderleek/create-issue-branch@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  # output-branch-name:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Output
-  #       uses: actions/checkout@v3
-  #     - run: echo ${{ steps.create-issue-branch.outputs.branchName }}
-
-  # write node app that uses github api
-    # loop through issues and generate branch
-    # ideal: github owned - actions
-    # no: paid actions
         
