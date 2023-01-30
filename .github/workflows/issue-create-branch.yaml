@@ -10,11 +10,7 @@ jobs:
     steps:
       - name: Create Issue Branch
         uses: robvanderleek/create-issue-branch@main
-        branchName: '${issue.number}-${issue.title}'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  echo_issue_details:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Echoing Issue Deets
-      run: echo ${{issue}}
+          branchName: '${issue.number}-${issue.title}'
+        run: echo ${{issue}}
