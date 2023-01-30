@@ -9,13 +9,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Create Issue Branch
-        uses: robvanderleek/create-issue-branch@main
+        uses: robvanderleek/create-issue-branch@main #have to pay for this for paid orgs - to find diff one?
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  output-branch-name:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Output
-        uses: actions/checkout@v3
-      - run: echo ${{ steps.create-issue-branch.outputs.branchName }}
+  # output-branch-name:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Output
+  #       uses: actions/checkout@v3
+  #     - run: echo ${{ steps.create-issue-branch.outputs.branchName }}
         
