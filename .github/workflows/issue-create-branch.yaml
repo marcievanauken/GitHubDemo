@@ -12,7 +12,5 @@ jobs:
         uses: robvanderleek/create-issue-branch@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Testing uses
-      - uses: actions/checkout@v3
-      - uses: ./.github/issue-branch
+      - run: echo ${{ issue }}
         
