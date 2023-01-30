@@ -16,5 +16,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Output
+        uses: actions/checkout@v3
       - run: echo ${{ steps.create-issue-branch.outputs.branchName }}
         
