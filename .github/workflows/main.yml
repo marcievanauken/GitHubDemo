@@ -1,5 +1,3 @@
-name: Create Issue Branch
-run-name: ${{ github.actor }} created an Issue
 on:
   issues:
     types: [ assigned ]
