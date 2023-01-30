@@ -10,7 +10,8 @@ jobs:
     steps:
       - name: Create Issue Branch
         uses: robvanderleek/create-issue-branch@main
-      - name: Testing uses
-        uses: ./.github/issue-branch
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Testing uses
+        uses: ./.github/issue-branch
+        
