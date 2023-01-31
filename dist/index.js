@@ -9785,7 +9785,7 @@ try {
   const payload = JSON.stringify(github.context.payload, undefined, 2)
   // console.log(`The event payload: ${payload}`);
   console.log('HEEEREEEEEEEE');
-  console.log(github.context.payload.issue)
+  console.log(github.context.payload.issue.title)
   console.log('HEEEREEEEEEEE');
 } catch (error) {
   core.setFailed(error.message);
