@@ -13,38 +13,39 @@ const webhooks = new Webhooks({
   secret: config.ghCreds.secret,
 });
 
-const webhookProxyUrl = "https://smee.io/oQVZEiZC5N9juPAH"; //local dev to read event payload
+const webhookProxyUrl = config.ghCreds.smeeUrl; //local dev: using smee url for wehbook url testing
 const source = new EventSource(webhookProxyUrl);
+
 source.onmessage = (event) => {
-  const webhookEvent = JSON.parse(event.data);
-  if (webhookEvent.body.action == 'assigned'){
-  	createBranch(webhookEvent.body)
+  const issueEvent = JSON.parse(event.data);
+  if (issueEvent.body.action == 'assigned'){
+	let assignee = issueEvent.body.assignee.login;
+	let assigner = issueEvent.body.sender.login;
+	let issueTitle = issueEvent.body.issue.title;
+	let issueNum = issueEvent.body.issue.number; 
+	console.log(`New Issue: ${issueTitle}, Assigned To: ${assignee}, Assigned By: ${assigner}`);
+	let brTitle = issueNum.toString()+' '+ issueTitle; //appending # bc dup branch names aren't allowed
+	createBranch(brTitle);
   }
 };
 
-async function createBranch(payload) {
+//making changes on branch
+
+async function createBranch(brTitle) {
 	try {
-		console.log("createBranch")
-		console.log(payload.issue.title)
-		// var issueTitle = '';
-		// if (github.context.payload.hasOwnProperty("issue")){
-		// 	issueTitle = github.context.payload.issue.title;
-		// 	issueTitle = issueTitle.replace(/\s+/g, '-').toLowerCase();
-		// } else {
-		// 	issueTitle = new Date().getTime();
-		// }
-		// const fetchRef = await octokit.request('GET /repos/{owner}/{repo}/git/ref/{ref}', {
-		//   owner: owner,
-		//   repo: repo,
-		//   ref: 'heads/master'
-		// });
-		// const createBranch = await octokit.request('POST /repos/{owner}/{repo}/git/refs', {
-		//   owner: owner,
-		//   repo: repo,
-		//   ref: 'refs/heads/'+ issueTitle,
-		//   sha: fetchRef.data.object.sha
-		// });
-		// console.log(createBranch)
+		brTitle = brTitle.replace(/\s+/g, '-').toLowerCase();
+		const fetchRef = await octokit.request('GET /repos/{owner}/{repo}/git/ref/{ref}', {
+		  owner: owner,
+		  repo: repo,
+		  ref: 'heads/master'
+		});
+		const createBranch = await octokit.request('POST /repos/{owner}/{repo}/git/refs', {
+		  owner: owner,
+		  repo: repo,
+		  ref: 'refs/heads/'+ brTitle,
+		  sha: fetchRef.data.object.sha
+		});
+		console.log(`New Branch Created: ${createBranch.data.ref}`);
 	} 
 	catch (error) {
 	  console.log(error);
