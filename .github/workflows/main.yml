@@ -1,28 +1,28 @@
-name: GitHub Actions Demo
-run-name: ${{ github.actor }} created an issue 🚀
+# name: GitHub Actions Demo
+# run-name: ${{ github.actor }} created an issue 🚀
 on:
   issues:
     types: [ assigned ]
 
-jobs:
-  create-issue-branch:
-    runs-on: ubuntu-latest
-    name: Create Branch from Issue
-    steps:
-        uses: marcievanauken/GitHubDemo@master
+# jobs:
+#   create-issue-branch:
+#     runs-on: ubuntu-latest
+#     name: Create Branch from Issue
+#     steps:
+#         uses: marcievanauken/GitHubDemo@master
 
 
 # on: [push]
-# jobs:
-#   hello_world_job:
-#     runs-on: ubuntu-latest
-#     name: A job to say hello
-#     steps:
-#       - name: Hello world action step
-#         id: hello
-#         uses: marcievanauken/GitHubDemo@master
-#         with:
-#           who-to-greet: 'Marcie Vana'
-#       # Use the output from the `hello` step
-#       - name: Get the output time
-#         run: echo "The time was ${{ steps.hello.outputs.time }}"
+jobs:
+  hello_world_job:
+    runs-on: ubuntu-latest
+    name: A job to say hello
+    steps:
+      - name: Hello world action step
+        id: hello
+        uses: marcievanauken/GitHubDemo@master
+        with:
+          who-to-greet: 'Marcie Vana'
+      # Use the output from the `hello` step
+      - name: Get the output time
+        run: echo "The time was ${{ steps.hello.outputs.time }}"
