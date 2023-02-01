@@ -1,1 +1,0 @@
-branchName: '${issue.number}-BLAH2-${issue.title}'
