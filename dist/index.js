@@ -12024,10 +12024,10 @@ const core = __nccwpck_require__(8864);
 const github = __nccwpck_require__(6366);
 const { Octokit } = __nccwpck_require__(3092);
 const config = __nccwpck_require__(2197);
-
+console.log(config.ghCreds.accessToken)
 
 const octokit = new Octokit({
-    auth: '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'
+    auth: config.ghCreds.accessToken
 });
 
 var usingGitHub = false;
@@ -12055,7 +12055,6 @@ if (usingGitHub){
 
 async function createBranch() {
 	try {
-
 		var issueTitle = '';
 		if (github.context.payload.hasOwnProperty("issue")){
 			issueTitle = github.context.payload.issue.title;
@@ -12063,17 +12062,12 @@ async function createBranch() {
 		} else {
 			issueTitle = new Date().getTime();
 		}
-		
-		console.log("!!!!!!!!!issueTitle!!!!!!!!!!")
-		console.log(issueTitle)
+
 		const fetchRef = await octokit.request('GET /repos/{owner}/{repo}/git/ref/{ref}', {
 		  owner: owner,
 		  repo: repo,
 		  ref: 'heads/master'
 		});
-
-		console.log('!!!!!!!!!fetchRef!!!!!!!!!!')
-		console.log(fetchRef)
 
 		const createBranch = await octokit.request('POST /repos/{owner}/{repo}/git/refs', {
 		  owner: owner,
