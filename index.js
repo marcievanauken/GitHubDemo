@@ -50,6 +50,9 @@ async function createBranch() {
 		  ref: 'heads/master'
 		});
 
+		console.log('!!!!!!!!!fetchRef!!!!!!!!!!')
+		console.log(fetchRef)
+
 		const createBranch = await octokit.request('POST /repos/{owner}/{repo}/git/refs', {
 		  owner: owner,
 		  repo: repo,

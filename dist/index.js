@@ -12027,12 +12027,12 @@ const config = __nccwpck_require__(2197);
 
 
 const octokit = new Octokit({
-    auth: config.ghCreds.accessToken
+    auth: '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'
 });
 
 var usingGitHub = false;
-const owner = config.ghCreds.owner;
-const repo = config.ghCreds.repo;
+const owner = 'marcievanauken';
+const repo = 'GitHubDemo';
 
 
 if (usingGitHub){
@@ -12071,6 +12071,9 @@ async function createBranch() {
 		  repo: repo,
 		  ref: 'heads/master'
 		});
+
+		console.log('!!!!!!!!!fetchRef!!!!!!!!!!')
+		console.log(fetchRef)
 
 		const createBranch = await octokit.request('POST /repos/{owner}/{repo}/git/refs', {
 		  owner: owner,
