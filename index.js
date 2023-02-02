@@ -19,31 +19,42 @@ const source = new EventSource(webhookProxyUrl);
 
 source.onmessage = (event) => {
   event = JSON.parse(event.data);
-  console.log(event)
-
   if (event.body.hasOwnProperty("issue") && event.body.action == 'assigned'){
 	issueAssigned(event);
   }
-  if (event.body.hasOwnProperty("pull_request")){ //&& event.body.action == 'opened'
-  	console.log(event.body.pull_request.head);
-  	// console.log(event.body.pull_request.head.ref);
+  if (event.body.hasOwnProperty("pull_request") && event.body.action == 'assigned'){ //&& event.body.action == 'opened'
+  	let prData = {};
   	let prBranchToMerge = event.body.pull_request.head.ref;
-  	console.log(prBranchToMerge)
-  	// console.log(JSON.stringify(event.body.pull_request.base));
+  	prData.prNum = event.body.number.toString();
+  	prData.issueToLink = prBranchToMerge.split('-')[0];
+  	prData.prDesc = event.body.pull_request.body;
+  	linkIssueToPR(prData);
   }
 };
 
-async function issueAssigned(e){
-	let assignee = e.body.assignee.login;
-	let assigner = e.body.sender.login;
-	let issueTitle = e.body.issue.title;
-	let issueNum = e.body.issue.number; 
+async function linkIssueToPR(prData){
+	console.log(prData);
+	const linkIssue = await octokit.request('PATCH /repos/{owner}/{repo}/pulls/{pull_number}', {
+	  owner: owner,
+	  repo: repo,
+	  pull_number: prData.prNum,
+	  body: 'closes #' + prData.issueToLink + ' || ' + prData.prDesc
+	});
+	console.log(linkIssue)
+
+}
+
+async function issueAssigned(issueData){
+	let assignee = issueData.body.assignee.login;
+	let assigner = issueData.body.sender.login;
+	let issueTitle = issueData.body.issue.title;
+	let issueNum = issueData.body.issue.number; 
 	console.log(`New Issue: ${issueTitle}, Assigned To: ${assignee}, Assigned By: ${assigner}`);
-	let brName = issueNum.toString()+' '+ issueTitle; //appending # bc dup branch names aren't allowed and is helpful for linking issues to prs
+	let brName = issueNum.toString()+' '+ issueTitle; //appending # bc dup branch names aren't allowed and is needed for linking issues to prs
 	if (config.ghCreds.createBranch) createBranch(brName);
 }
 
-
+//changing
 
 async function createBranch(brName) {
 	try {
