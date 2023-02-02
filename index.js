@@ -19,6 +19,7 @@ const source = new EventSource(webhookProxyUrl);
 
 source.onmessage = (event) => {
   event = JSON.parse(event.data);
+  console.log(event)
   if (event.body.hasOwnProperty("issue") && event.body.action == 'assigned'){
 	issueAssigned(event);
   }
@@ -49,8 +50,8 @@ async function linkIssueToPR(prData){
 async function issueAssigned(issueData){
 	let issueNum = issueData.body.issue.number; 
 	let brName = issueNum.toString()+' '+ issueData.body.issue.title; //appending # bc dup branch names aren't allowed and is needed for linking issues to prs
-	createBranch(brName);
 	console.log(`New Issue: ${issueData.body.issue.title}, Assigned To: ${issueData.body.assignee.login}, Assigned By: ${issueData.body.sender.login}`);
+	createBranch(brName);
 }
 
 async function createBranch(brName) {
@@ -69,7 +70,6 @@ async function createBranch(brName) {
 		  ref: 'refs/heads/'+ brName,
 		  sha: fetchRef.data.object.sha
 		});
-		console.log(createBranch)
 		console.log(`New Branch Created: ${createBranch.data.ref}`);
 	} 
 	catch (error) {
