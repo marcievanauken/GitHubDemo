@@ -1,6 +1,6 @@
 const { Octokit } = require("@octokit/rest");
 const { Webhooks, createNodeMiddleware } = require("@octokit/webhooks");
-const EventSource = require('eventsource'); // local dev: watches for an event from the URL source (webhook url)
+const EventSource = require('eventsource'); // watches for an event from the URL source (webhook url)
 const config = require('./config.js');
 const owner = config.ghCreds.owner;
 const repo = config.ghCreds.repo;
@@ -13,27 +13,36 @@ const webhooks = new Webhooks({
   secret: config.ghCreds.secret,
 });
 
-const webhookProxyUrl = config.ghCreds.smeeUrl; //local dev: using smee url for wehbook url testing
+//local dev resource used: https://github.com/octokit/webhooks.js/
+const webhookProxyUrl = config.ghCreds.smeeUrl; //local dev: using smee for wehbook proxy url
 const source = new EventSource(webhookProxyUrl);
 
 source.onmessage = (event) => {
-  const issueEvent = JSON.parse(event.data);
-  if (issueEvent.body.action == 'assigned'){
-	let assignee = issueEvent.body.assignee.login;
-	let assigner = issueEvent.body.sender.login;
-	let issueTitle = issueEvent.body.issue.title;
-	let issueNum = issueEvent.body.issue.number; 
-	console.log(`New Issue: ${issueTitle}, Assigned To: ${assignee}, Assigned By: ${assigner}`);
-	let brTitle = issueNum.toString()+' '+ issueTitle; //appending # bc dup branch names aren't allowed
-	createBranch(brTitle);
+  event = JSON.parse(event.data);
+  console.log(event)
+  if (event.body.action == 'assigned'){
+	issueAssigned(event);
   }
 };
 
-//making changes on branch
+async function issueAssigned(e){
+	console.log(e)
+	let assignee = e.body.assignee.login;
+	let assigner = e.body.sender.login;
+	let issueTitle = e.body.issue.title;
+	let issueNum = e.body.issue.number; 
+	console.log(`New Issue: ${issueTitle}, Assigned To: ${assignee}, Assigned By: ${assigner}`);
+	let brName = issueNum.toString()+' '+ issueTitle; //appending # bc dup branch names aren't allowed and is helpful for linking issues to prs
+	if (config.ghCreds.createBranch) createBranch(brName);
+}
 
-async function createBranch(brTitle) {
+
+
+async function createBranch(brName) {
 	try {
-		brTitle = brTitle.replace(/\s+/g, '-').toLowerCase();
+		// if we assign multiple people, unassign, or reassign, we will try to create the branch again
+		// to check whether branch exists first, then create branch
+		brName = brName.replace(/\s+/g, '-').toLowerCase();
 		const fetchRef = await octokit.request('GET /repos/{owner}/{repo}/git/ref/{ref}', {
 		  owner: owner,
 		  repo: repo,
@@ -42,7 +51,7 @@ async function createBranch(brTitle) {
 		const createBranch = await octokit.request('POST /repos/{owner}/{repo}/git/refs', {
 		  owner: owner,
 		  repo: repo,
-		  ref: 'refs/heads/'+ brTitle,
+		  ref: 'refs/heads/'+ brName,
 		  sha: fetchRef.data.object.sha
 		});
 		console.log(`New Branch Created: ${createBranch.data.ref}`);
