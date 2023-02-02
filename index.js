@@ -31,21 +31,12 @@ source.onmessage = (event) => {
   	prData.prDesc = event.body.pull_request.body;
   	linkIssueToPR(prData);
   }
+  // if (event.body.hasOwnProperty("pull_request") && event.body.action == 'opened'){ 
+  	
+  // }
 };
 
-async function linkIssueToPR(prData){
-	let prBody = '[closes #' + prData.issueToLink + '] ';
-	if (prData.prDesc != null){
-		prBody = prBody + prData.prDesc;
-	}
-	const linkIssue = await octokit.request('PATCH /repos/{owner}/{repo}/pulls/{pull_number}', {
-	  owner: owner,
-	  repo: repo,
-	  pull_number: prData.prNum,
-	  body: prBody
-	});
-	console.log(`PR desc updated with Issue to auto-link: ${linkIssue.data.body}`);
-}
+// new change to test pr close action id
 
 async function issueAssigned(issueData){
 	let issueNum = issueData.body.issue.number; 
@@ -75,4 +66,18 @@ async function createBranch(brName) {
 	catch (error) {
 	  console.log(error);
 	}
+}
+
+async function linkIssueToPR(prData){
+	let prBody = '[closes #' + prData.issueToLink + '] ';
+	if (prData.prDesc != null){
+		prBody = prBody + prData.prDesc;
+	}
+	const linkIssue = await octokit.request('PATCH /repos/{owner}/{repo}/pulls/{pull_number}', {
+	  owner: owner,
+	  repo: repo,
+	  pull_number: prData.prNum,
+	  body: prBody
+	});
+	console.log(`PR desc updated with Issue to auto-link: ${linkIssue.data.body}`);
 }
