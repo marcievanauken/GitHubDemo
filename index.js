@@ -22,7 +22,7 @@ source.onmessage = (event) => {
   if (event.body.hasOwnProperty("issue") && event.body.action == 'assigned'){
 	issueAssigned(event);
   }
-  if (event.body.hasOwnProperty("pull_request") && event.body.action == 'assigned'){ //&& event.body.action == 'opened'
+  if (event.body.hasOwnProperty("pull_request") && event.body.action == 'opened'){ //&& event.body.action == 'opened'
   	let prData = {};
   	let prBranchToMerge = event.body.pull_request.head.ref;
   	prData.prNum = event.body.number.toString();
