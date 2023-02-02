@@ -33,28 +33,25 @@ source.onmessage = (event) => {
 };
 
 async function linkIssueToPR(prData){
-	console.log(prData);
+	let prBody = '[closes #' + prData.issueToLink + '] ';
+	if (prData.prDesc != null){
+		prBody = prBody + prData.prDesc;
+	}
 	const linkIssue = await octokit.request('PATCH /repos/{owner}/{repo}/pulls/{pull_number}', {
 	  owner: owner,
 	  repo: repo,
 	  pull_number: prData.prNum,
-	  body: 'closes #' + prData.issueToLink + ' || ' + prData.prDesc
+	  body: prBody
 	});
-	console.log(`Issue Linked: ${linkIssue.data.body}`);
-
+	console.log(`PR desc updated with Issue to auto-link: ${linkIssue.data.body}`);
 }
 
 async function issueAssigned(issueData){
-	let assignee = issueData.body.assignee.login;
-	let assigner = issueData.body.sender.login;
-	let issueTitle = issueData.body.issue.title;
 	let issueNum = issueData.body.issue.number; 
-	console.log(`New Issue: ${issueTitle}, Assigned To: ${assignee}, Assigned By: ${assigner}`);
-	let brName = issueNum.toString()+' '+ issueTitle; //appending # bc dup branch names aren't allowed and is needed for linking issues to prs
+	console.log(`New Issue: ${issueData.body.issue.title}, Assigned To: ${issueData.body.assignee.login}, Assigned By: ${issueData.body.sender.login}`);
+	let brName = issueNum.toString()+' '+ issueData.body.issue.title; //appending # bc dup branch names aren't allowed and is needed for linking issues to prs
 	if (config.ghCreds.createBranch) createBranch(brName);
 }
-
-//changing
 
 async function createBranch(brName) {
 	try {
