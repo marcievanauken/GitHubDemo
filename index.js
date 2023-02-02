@@ -20,13 +20,17 @@ const source = new EventSource(webhookProxyUrl);
 source.onmessage = (event) => {
   event = JSON.parse(event.data);
   console.log(event)
-  if (event.body.action == 'assigned'){
+
+  if (event.body.hasOwnProperty("issue") && event.body.action == 'assigned'){
 	issueAssigned(event);
+  }
+  if (event.body.hasOwnProperty("pull_request")){ //&& event.body.action == 'opened'
+  	console.log(event.body.pull_request.head);
+  	// console.log(JSON.stringify(event.body.pull_request.base));
   }
 };
 
 async function issueAssigned(e){
-	console.log(e)
 	let assignee = e.body.assignee.login;
 	let assigner = e.body.sender.login;
 	let issueTitle = e.body.issue.title;
