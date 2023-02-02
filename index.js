@@ -26,6 +26,9 @@ source.onmessage = (event) => {
   }
   if (event.body.hasOwnProperty("pull_request")){ //&& event.body.action == 'opened'
   	console.log(event.body.pull_request.head);
+  	// console.log(event.body.pull_request.head.ref);
+  	let prBranchToMerge = event.body.pull_request.head.ref;
+  	console.log(prBranchToMerge)
   	// console.log(JSON.stringify(event.body.pull_request.base));
   }
 };
