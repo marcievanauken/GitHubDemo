@@ -40,7 +40,7 @@ async function linkIssueToPR(prData){
 	  pull_number: prData.prNum,
 	  body: 'closes #' + prData.issueToLink + ' || ' + prData.prDesc
 	});
-	console.log(linkIssue)
+	console.log(`Issue Linked: ${linkIssue.data.body}`);
 
 }
 
