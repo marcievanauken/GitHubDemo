@@ -19,33 +19,26 @@ const source = new EventSource(webhookProxyUrl);
 
 source.onmessage = (event) => {
   event = JSON.parse(event.data);
-  console.log(event)
-  if (event.body.hasOwnProperty("issue") && event.body.action == 'assigned'){
-	issueAssigned(event);
+  let action = event.body.action;
+  if (event.body.hasOwnProperty("issue") && action == 'assigned'){ //refactor this somehow
+	prepareBranchName(event);
   }
-  if (event.body.hasOwnProperty("pull_request") && event.body.action == 'opened'){ // demo using assigned
-  	let prData = {};
-  	let prBranchToMerge = event.body.pull_request.head.ref;
-  	prData.prNum = event.body.number.toString();
-  	prData.issueToLink = prBranchToMerge.split('-')[0];
-  	prData.prDesc = event.body.pull_request.body;
-  	linkIssueToPR(prData);
+  if (event.body.hasOwnProperty("pull_request") && action == 'assigned'){ // test use assigned, else opened
+  	linkIssueToPR(event);
   }
-  // if (event.body.hasOwnProperty("pull_request") && event.body.action == 'opened'){ 
-  	
-  // }
+  if (event.body.hasOwnProperty("pull_request") && action == 'closed'){ 
+  	console.log(event)
+  }
 };
 
-// new change to test pr close action id
-
-async function issueAssigned(issueData){
+async function prepareBranchName(issueData){
 	let issueNum = issueData.body.issue.number; 
 	let brName = issueNum.toString()+' '+ issueData.body.issue.title; //appending # bc dup branch names aren't allowed and is needed for linking issues to prs
 	console.log(`New Issue: ${issueData.body.issue.title}, Assigned To: ${issueData.body.assignee.login}, Assigned By: ${issueData.body.sender.login}`);
-	createBranch(brName);
+	createBranch(brName); // to return brName, and send to createBranch async await
 }
 
-async function createBranch(brName) {
+async function createBranch(brName) { //change to createRef (to handle new branch ref and tag ref (refs/tags/[tag]) --> pass ref paths and other needed info here)
 	try {
 		// if we assign multiple people, unassign, or reassign, we will try to create the branch again
 		// to check whether branch exists first, then create branch
@@ -68,16 +61,23 @@ async function createBranch(brName) {
 	}
 }
 
-async function linkIssueToPR(prData){
-	let prBody = '[closes #' + prData.issueToLink + '] ';
-	if (prData.prDesc != null){
-		prBody = prBody + prData.prDesc;
-	}
-	const linkIssue = await octokit.request('PATCH /repos/{owner}/{repo}/pulls/{pull_number}', {
-	  owner: owner,
-	  repo: repo,
-	  pull_number: prData.prNum,
-	  body: prBody
-	});
-	console.log(`PR desc updated with Issue to auto-link: ${linkIssue.data.body}`);
+async function linkIssueToPR(pullReqData){
+	console.log(pullReqData)
+	// let prData = {};
+ //  	let prBranchToMerge = event.body.pull_request.head.ref;
+ //  	prData.prNum = event.body.number.toString();
+ //  	prData.issueToLink = prBranchToMerge.split('-')[0];
+ //  	prData.prDesc = event.body.pull_request.body;
+
+	// let prBody = '[closes #' + prData.issueToLink + '] ';
+	// if (prData.prDesc != null){
+	// 	prBody = prBody + prData.prDesc;
+	// }
+	// const linkIssue = await octokit.request('PATCH /repos/{owner}/{repo}/pulls/{pull_number}', {
+	//   owner: owner,
+	//   repo: repo,
+	//   pull_number: prData.prNum,
+	//   body: prBody
+	// });
+	// console.log(`PR desc updated with Issue to auto-link: ${linkIssue.data.body}`);
 }
