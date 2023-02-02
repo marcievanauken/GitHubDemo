@@ -22,7 +22,7 @@ source.onmessage = (event) => {
   if (event.body.hasOwnProperty("issue") && event.body.action == 'assigned'){
 	issueAssigned(event);
   }
-  if (event.body.hasOwnProperty("pull_request") && event.body.action == 'opened'){ //&& event.body.action == 'opened'
+  if (event.body.hasOwnProperty("pull_request") && event.body.action == 'opened'){ // demo using assigned
   	let prData = {};
   	let prBranchToMerge = event.body.pull_request.head.ref;
   	prData.prNum = event.body.number.toString();
@@ -31,8 +31,6 @@ source.onmessage = (event) => {
   	linkIssueToPR(prData);
   }
 };
-
-// hello hello changing the code making a comment
 
 async function linkIssueToPR(prData){
 	let prBody = '[closes #' + prData.issueToLink + '] ';
@@ -50,9 +48,9 @@ async function linkIssueToPR(prData){
 
 async function issueAssigned(issueData){
 	let issueNum = issueData.body.issue.number; 
-	console.log(`New Issue: ${issueData.body.issue.title}, Assigned To: ${issueData.body.assignee.login}, Assigned By: ${issueData.body.sender.login}`);
 	let brName = issueNum.toString()+' '+ issueData.body.issue.title; //appending # bc dup branch names aren't allowed and is needed for linking issues to prs
-	if (config.ghCreds.createBranch) createBranch(brName);
+	createBranch(brName);
+	console.log(`New Issue: ${issueData.body.issue.title}, Assigned To: ${issueData.body.assignee.login}, Assigned By: ${issueData.body.sender.login}`);
 }
 
 async function createBranch(brName) {
@@ -71,6 +69,7 @@ async function createBranch(brName) {
 		  ref: 'refs/heads/'+ brName,
 		  sha: fetchRef.data.object.sha
 		});
+		console.log(createBranch)
 		console.log(`New Branch Created: ${createBranch.data.ref}`);
 	} 
 	catch (error) {
