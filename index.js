@@ -76,7 +76,7 @@ async function tagBranch(e) {
 		//   ref: 'refs/tags/1.0.0', // to be variable
 		//   sha: createTagObj.data.object.sha
 		// });
-		console.log(`Main Branch Tagged: ${createTag}`);
+		console.log(`Tagging Result: ${createTag}`);
 	}
 	catch (error) {
 	  console.log(error.response.data.message); //reference already exists
@@ -92,7 +92,7 @@ async function createBranch(brName) {
 		  ref: 'heads/master'
 		});
 		const createBranch = await createRef('refs/heads/'+ brName, fetchRef.data.object.sha);
-		console.log(`New Branch Created: ${createBranch}`);
+		console.log(`Branching Result: ${createBranch}`);
 	}
 	catch (error) {
 	  console.log(`Error Msg: ${error.response.data.message}, Error Info: ${error.request.body}`);
