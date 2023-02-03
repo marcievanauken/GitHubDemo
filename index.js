@@ -17,32 +17,49 @@ const webhooks = new Webhooks({
 const webhookProxyUrl = config.ghCreds.smeeUrl; //local dev: using smee for wehbook proxy url
 const source = new EventSource(webhookProxyUrl);
 
-source.onmessage = (event) => {
-  event = JSON.parse(event.data);
-  let action = event.body.action;
-  if (event.body.hasOwnProperty("issue") && action == 'assigned'){ //refactor this somehow
-	prepareBranchName(event);
-  }
-  if (event.body.hasOwnProperty("pull_request") && action == 'assigned'){ // test use assigned, else opened
-  	linkIssueToPR(event);
-  }
-  if (event.body.hasOwnProperty("pull_request") && action == 'closed'){ 
-  	console.log(event)
-  }
+source.onmessage = async (event) => {
+	try {
+	  event = JSON.parse(event.data);
+	  let action = event.body.action;
+	  if (event.body.hasOwnProperty("issue") && action == 'assigned'){
+		const branchName = await prepareBranchName(event);
+		createBranch(branchName); // to be createRef()?
+	  }
+	  if (event.body.hasOwnProperty("pull_request") && action == 'assigned'){ // assigned:test, opened:actual
+	  	linkIssueToPR(event);
+	  }
+	  if (event.body.hasOwnProperty("pull_request") && action == 'closed'){ 
+	  	// !!test tags endpoint in postman to see if we can use same function for tags and branches!!
+	  	// createRef() or createTag()
+	  	console.log(event);
+		}
+	}
+  	catch (error) {
+	  console.log(error);
+	}
 };
 
-async function prepareBranchName(issueData){
-	let issueNum = issueData.body.issue.number; 
-	let brName = issueNum.toString()+' '+ issueData.body.issue.title; //appending # bc dup branch names aren't allowed and is needed for linking issues to prs
-	console.log(`New Issue: ${issueData.body.issue.title}, Assigned To: ${issueData.body.assignee.login}, Assigned By: ${issueData.body.sender.login}`);
-	createBranch(brName); // to return brName, and send to createBranch async await
-}
-
-async function createBranch(brName) { //change to createRef (to handle new branch ref and tag ref (refs/tags/[tag]) --> pass ref paths and other needed info here)
+function prepareBranchName(issueData){
 	try {
-		// if we assign multiple people, unassign, or reassign, we will try to create the branch again
-		// to check whether branch exists first, then create branch
+		let issueNum = issueData.body.issue.number; 
+		let brName = issueNum.toString()+' '+ issueData.body.issue.title; //appending # to link issues to prs and bc dup branch names aren't allowed
 		brName = brName.replace(/\s+/g, '-').toLowerCase();
+		console.log(`New Issue: ${issueData.body.issue.title}, Assigned To: ${issueData.body.assignee.login}, Assigned By: ${issueData.body.sender.login}`);
+		return brName;
+	}
+	catch (error) {
+	  console.log(error);
+	}
+};
+
+async function createBranch(brName) {
+	try {
+		// if we assign multiple people or unassign and then assign again (reassign?) we will try to create the branch again
+		// to test assign unassign and assign in same situation
+		// to test assigning multiple people to issue
+		// to test other characters: apostrophe, period or whatever
+		// to check whether branch exists first, then create branch
+
 		const fetchRef = await octokit.request('GET /repos/{owner}/{repo}/git/ref/{ref}', {
 		  owner: owner,
 		  repo: repo,
@@ -55,29 +72,28 @@ async function createBranch(brName) { //change to createRef (to handle new branc
 		  sha: fetchRef.data.object.sha
 		});
 		console.log(`New Branch Created: ${createBranch.data.ref}`);
-	} 
+	}
 	catch (error) {
 	  console.log(error);
 	}
-}
+};
 
 async function linkIssueToPR(pullReqData){
-	console.log(pullReqData)
-	// let prData = {};
- //  	let prBranchToMerge = event.body.pull_request.head.ref;
- //  	prData.prNum = event.body.number.toString();
- //  	prData.issueToLink = prBranchToMerge.split('-')[0];
- //  	prData.prDesc = event.body.pull_request.body;
-
-	// let prBody = '[closes #' + prData.issueToLink + '] ';
-	// if (prData.prDesc != null){
-	// 	prBody = prBody + prData.prDesc;
-	// }
-	// const linkIssue = await octokit.request('PATCH /repos/{owner}/{repo}/pulls/{pull_number}', {
-	//   owner: owner,
-	//   repo: repo,
-	//   pull_number: prData.prNum,
-	//   body: prBody
-	// });
-	// console.log(`PR desc updated with Issue to auto-link: ${linkIssue.data.body}`);
-}
+	try {
+	  	let prBranchToMerge = pullReqData.body.pull_request.head.ref;
+		let prBody = '[closes #' + prBranchToMerge.split('-')[0] + '] ';
+		if (pullReqData.body.pull_request.body != null){
+			prBody = prBody + pullReqData.body.pull_request.body;
+		}
+		const linkIssue = await octokit.request('PATCH /repos/{owner}/{repo}/pulls/{pull_number}', {
+		  owner: owner,
+		  repo: repo,
+		  pull_number: pullReqData.body.number.toString(),
+		  body: prBody
+		});
+		console.log(`PR desc updated with IssueNum to trigger auto-link: ${linkIssue.data.body}`);
+	}
+	catch (error) {
+	  console.log(error);
+	}
+};
