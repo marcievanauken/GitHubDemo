@@ -55,12 +55,18 @@ function prepareBranchName(issueData){
 
 async function tagBranch(e) {
 	try {
+		const fetchRef = await octokit.request('GET /repos/{owner}/{repo}/git/ref/{ref}', {
+		  owner: owner,
+		  repo: repo,
+		  ref: 'heads/master'
+		});
+		console.log(fetchRef)
 		const createTagObj = await octokit.request('POST /repos/{owner}/{repo}/git/tags', {
 		  owner: owner,
 		  repo: repo,
 		  tag: '1.0.0', // to be variable - calculated based on labels?
 		  message: 'tag main branch',
-		  object: 'e8268d5807e97ba5385b15a3ff0485daf89094df',
+		  object: fetchRef.data.object.sha,
 		  type: 'commit'
 		});
 		console.log("createTagObj")
