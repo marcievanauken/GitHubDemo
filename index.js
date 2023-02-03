@@ -58,6 +58,7 @@ async function tagBranch(e) {
 	try {
 		console.log("e")
 		console.log(e)
+		console.log(e.body.pull_request.merge_commit_sha)
 		const fetchRef = await octokit.request('GET /repos/{owner}/{repo}/git/ref/{ref}', {
 		  owner: owner,
 		  repo: repo,
