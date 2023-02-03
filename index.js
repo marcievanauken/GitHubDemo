@@ -60,7 +60,7 @@ async function tagBranch(e) {
 		  repo: repo,
 		  tag: '1.0.0', // to be variable - calculated based on labels?
 		  message: 'tag main branch',
-		  object: 'f531426b4de8c486c6e298c4fdaedaa6d3fcaa29',
+		  object: 'a4fd42b47729ff71671859ec551446d7436d7709',
 		  type: 'commit'
 		});
 		console.log("createTagObj")
@@ -68,7 +68,7 @@ async function tagBranch(e) {
 		const createTag = await octokit.request('POST /repos/{owner}/{repo}/git/refs', {
 		  owner: owner,
 		  repo: repo,
-		  ref: 'refs/tags/1.0.1', // to be variable
+		  ref: 'refs/tags/1.0.0', // to be variable
 		  sha: createTagObj.data.object.sha
 		});
 		console.log("createTag")
