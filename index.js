@@ -25,13 +25,14 @@ source.onmessage = async (event) => {
 		const branchName = await prepareBranchName(event);
 		createBranch(branchName); // to be createRef()?
 	  }
-	  if (event.body.hasOwnProperty("pull_request") && action == 'assigned'){ // assigned:test, opened:actual
+	  if (event.body.hasOwnProperty("pull_request") && action == 'opened'){ // assigned:test, opened:actual
 	  	linkIssueToPR(event);
 	  }
-	  if (event.body.hasOwnProperty("pull_request") && action == 'closed'){ 
+	  if (event.body.hasOwnProperty("pull_request") && action == 'assigned'){ 
 	  	// !!test tags endpoint in postman to see if we can use same function for tags and branches!!
-	  	// createRef() or createTag()
-	  	console.log(event);
+	  	// getLatestTag()
+	  	// tagBranch(getLatestTag) (createRef)
+	  	tagBranch(event);
 		}
 	}
   	catch (error) {
@@ -52,14 +53,37 @@ function prepareBranchName(issueData){
 	}
 };
 
+async function tagBranch(e) {
+	try {
+		console.log(e);
+		console.log(e.pull_request.merge_commit_sha);
+
+		// const createTagObj = await octokit.request('POST /repos/{owner}/{repo}/git/tags/{tag}', {
+		//   owner: owner,
+		//   repo: repo,
+		//   tag: '2.0.1' // to calculate based on tags?
+		//   object: e.pull_request.merge_commit_sha
+		//   type: 'commit'
+		// });
+		// const createTag = await octokit.request('POST /repos/{owner}/{repo}/git/refs', {
+		//   owner: owner,
+		//   repo: repo,
+		//   ref: 'refs/heads/'// + createTagObj.tag,
+		//   sha: // createTagObj.sha
+		// });
+		// console.log(`Main Branch Tagged: ${createTag.data.ref}`);
+	}
+	catch (error) {
+	  console.log(error);
+	}
+};
+
 async function createBranch(brName) {
 	try {
-		// if we assign multiple people or unassign and then assign again (reassign?) we will try to create the branch again
-		// to test assign unassign and assign in same situation
+		// to test assign unassign and assign in same issue
 		// to test assigning multiple people to issue
 		// to test other characters: apostrophe, period or whatever
-		// to check whether branch exists first, then create branch
-
+		// pending tests, to check whether branch exists first, then create branch
 		const fetchRef = await octokit.request('GET /repos/{owner}/{repo}/git/ref/{ref}', {
 		  owner: owner,
 		  repo: repo,
