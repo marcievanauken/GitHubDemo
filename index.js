@@ -83,37 +83,33 @@ async function tagBranch(e) {
 
 async function createBranch(brName) {
 	try {
-		let branchExists = false;
-		const checkBranch = await octokit.request('GET /repos/{owner}/{repo}/branches', {
+		// to discuss checkBranch() for dups (we can have catch handle it but then we call unecessary methods)
+		const fetchRef = await octokit.request('GET /repos/{owner}/{repo}/git/ref/{ref}', {
 		  owner: owner,
-		  repo: repo
+		  repo: repo,
+		  ref: 'heads/master'
 		});
-		checkBranch.data.forEach((branch) => {
-			if (branch.name == brName) branchExists = true;
-		});
-		if (!branchExists){
-			const fetchRef = await octokit.request('GET /repos/{owner}/{repo}/git/ref/{ref}', {
-			  owner: owner,
-			  repo: repo,
-			  ref: 'heads/master'
-			});
-			const createBranch = await createRef('refs/heads/'+ brName, fetchRef.data.object.sha);
-			console.log(`New Branch Created: ${createBranch}`);
-		}
+		const createBranch = await createRef('refs/heads/'+ brName, fetchRef.data.object.sha);
+		console.log(`New Branch Created: ${createBranch}`);
 	}
 	catch (error) {
-	  console.log(`Error Msg: ${error.response.data.message}, Error Info: ${error.request.body}`); //reference already exists, not a valid ref name (period at end)
+	  console.log(`Error Msg: ${error.response.data.message}, Error Info: ${error.request.body}`);
 	}
 };
 
 async function createRef(ref, sha){
-	const newRef = await octokit.request('POST /repos/{owner}/{repo}/git/refs', {
-	  owner: owner,
-	  repo: repo,
-	  ref: ref,
-	  sha: sha
-	});
-	return newRef.data.ref
+	try {
+		const newRef = await octokit.request('POST /repos/{owner}/{repo}/git/refs', {
+		  owner: owner,
+		  repo: repo,
+		  ref: ref,
+		  sha: sha
+		});
+		return newRef.data.ref
+	}
+	catch (error) {
+		return `Error Msg: ${error.response.data.message}, Error Info: ${error.request.body}` //reference already exists, not a valid ref name (period at end of issue title)
+	}
 }
 
 async function linkIssueToPR(pullReqData){
