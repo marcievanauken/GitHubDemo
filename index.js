@@ -30,9 +30,10 @@ source.onmessage = async (event) => {
 	  }
 	  if (event.body.hasOwnProperty("pull_request") && action == 'closed'){ 
 	  	// !!test tags endpoint in postman to see if we can use same function for tags and branches!!
-	  	// getLatestTag()
-	  	// tagBranch(getLatestTag) (createRef)
-	  	tagBranch(event);
+	  	// tagBranch(getLatestTag) createRef(tagBranch)
+	  	tagBranch(event); 
+	  	// might be safer to get it from the closed event though, instead of fetchRef in case of timing issue?
+	  	// don't need to get sha from closed event because the ref for the merged branch is created, and we can use the GET REF method, don't need to pass event
 		}
 	}
   	catch (error) {
@@ -55,12 +56,15 @@ function prepareBranchName(issueData){
 
 async function tagBranch(e) {
 	try {
+		console.log("e")
+		console.log(e)
 		const fetchRef = await octokit.request('GET /repos/{owner}/{repo}/git/ref/{ref}', {
 		  owner: owner,
 		  repo: repo,
 		  ref: 'heads/master'
 		});
-		console.log(fetchRef)
+		console.log("fetchRef.data.object.sha")
+		console.log(fetchRef.data.object.sha)
 		const createTagObj = await octokit.request('POST /repos/{owner}/{repo}/git/tags', {
 		  owner: owner,
 		  repo: repo,
@@ -69,16 +73,14 @@ async function tagBranch(e) {
 		  object: fetchRef.data.object.sha,
 		  type: 'commit'
 		});
-		console.log("createTagObj")
-		console.log(createTagObj)
+		console.log("createTagObj.data.object.sha")
+		console.log(createTagObj.data.object.sha)
 		const createTag = await octokit.request('POST /repos/{owner}/{repo}/git/refs', {
 		  owner: owner,
 		  repo: repo,
 		  ref: 'refs/tags/1.0.0', // to be variable
 		  sha: createTagObj.data.object.sha
 		});
-		console.log("createTag")
-		console.log(createTag.data)
 		console.log(`Main Branch Tagged: ${createTag.data.ref}`);
 	}
 	catch (error) {
