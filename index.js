@@ -69,9 +69,9 @@ async function tagBranch(e) {
 		const createTagObj = await octokit.request('POST /repos/{owner}/{repo}/git/tags', {
 		  owner: owner,
 		  repo: repo,
-		  tag: '1.0.1', // to be variable - calculated based on labels?
+		  tag: '1.0.2', // to be variable - calculated based on labels?
 		  message: 'tag main branch',
-		  object: fetchRef.data.object.sha,
+		  object: e.body.pull_request.merge_commit_sha, //can use fetchRef.data.object.sha, safer to use PR payload sha
 		  type: 'commit'
 		});
 		console.log("createTagObj.data.object.sha")
@@ -79,13 +79,13 @@ async function tagBranch(e) {
 		const createTag = await octokit.request('POST /repos/{owner}/{repo}/git/refs', {
 		  owner: owner,
 		  repo: repo,
-		  ref: 'refs/tags/1.0.1', // to be variable
+		  ref: 'refs/tags/1.0.2', // to be variable
 		  sha: createTagObj.data.object.sha
 		});
 		console.log(`Main Branch Tagged: ${createTag.data.ref}`);
 	}
 	catch (error) {
-	  console.log(error);
+	  console.log(error.data.message); //reference already exists
 	}
 };
 
@@ -131,6 +131,6 @@ async function linkIssueToPR(pullReqData){
 		console.log(`PR desc updated with IssueNum to trigger auto-link: ${linkIssue.data.body}`);
 	}
 	catch (error) {
-	  console.log(error);
+	  console.log(error.data.message); //reference already exists
 	}
 };
