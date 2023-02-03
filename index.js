@@ -25,19 +25,16 @@ source.onmessage = async (event) => {
 	  if (event.body.hasOwnProperty("issue") && action == 'assigned'){
 			const branchName = await prepareBranchName(event);
 			createBranch(branchName);
-			// create getRef function, use sha as input from createBranch return
 	  }
 	  if (event.body.hasOwnProperty("pull_request") && action == 'opened'){ // assigned:test, opened:actual
 	  	linkIssueToPR(event);
 	  }
 	  if (event.body.hasOwnProperty("pull_request") && action == 'closed'){ 
 	  	// prepareTag() 
-	  	tagBranch(event); // inputs: (pr merge event sha, generated v tag (1.0.1))
-	  	// create getRef function, use sha as input from tagBranch return
-
+	  	tagBranch(event); 
 	  }
 	}
-  	catch (error) {
+  catch (error) {
 	  console.log(error);
 	}
 };
@@ -57,35 +54,8 @@ function prepareBranchName(issueData){
 	}
 };
 
-async function tagBranch(e) {
-	try {
-		const createTagObj = await octokit.request('POST /repos/{owner}/{repo}/git/tags', {
-		  owner: owner,
-		  repo: repo,
-		  tag: '1.0.0', // to be variable - calculated based on labels?
-		  message: 'tag main branch',
-		  object: e.body.pull_request.merge_commit_sha, //can use fetchRef.data.object.sha, safer to use PR payload sha
-		  type: 'commit'
-		});
-
-
-		const createTag = await createRef('refs/tags/1.0.0', createTagObj.data.object.sha);
-		// const createTag = await octokit.request('POST /repos/{owner}/{repo}/git/refs', {
-		//   owner: owner,
-		//   repo: repo,
-		//   ref: 'refs/tags/1.0.0', // to be variable
-		//   sha: createTagObj.data.object.sha
-		// });
-		console.log(`Tagging Result: ${createTag}`);
-	}
-	catch (error) {
-	  console.log(error.response.data.message); //reference already exists
-	}
-};
-
 async function createBranch(brName) {
 	try {
-		// to discuss checkBranch() for dups (we can have catch handle it but then we call unecessary methods)
 		const fetchRef = await octokit.request('GET /repos/{owner}/{repo}/git/ref/{ref}', {
 		  owner: owner,
 		  repo: repo,
@@ -93,6 +63,45 @@ async function createBranch(brName) {
 		});
 		const createBranch = await createRef('refs/heads/'+ brName, fetchRef.data.object.sha);
 		console.log(`Branching Result: ${createBranch}`);
+	}
+	catch (error) {
+	  console.log(`Error Msg: ${error.response.data.message}, Error Info: ${error.request.body}`);
+	}
+};
+
+async function linkIssueToPR(pullReqData){
+	try {
+	  let prBranchToMerge = pullReqData.body.pull_request.head.ref;
+		let prBody = '[closes #' + prBranchToMerge.split('-')[0] + '] ';
+		if (pullReqData.body.pull_request.body != null){
+			prBody = prBody + pullReqData.body.pull_request.body;
+		}
+		const linkIssue = await octokit.request('PATCH /repos/{owner}/{repo}/pulls/{pull_number}', {
+		  owner: owner,
+		  repo: repo,
+		  pull_number: pullReqData.body.number.toString(),
+		  body: prBody
+		});
+		console.log(`PR desc updated with IssueNum to trigger auto-link: ${linkIssue.data.body}`);
+	}
+	catch (error) {
+	  console.log(error);
+	}
+};
+
+async function tagBranch(e) {
+	try {
+		let tag = '1.0.3'
+		const createTagObj = await octokit.request('POST /repos/{owner}/{repo}/git/tags', {
+		  owner: owner,
+		  repo: repo,
+		  tag: tag,
+		  message: 'tag main branch',
+		  object: e.body.pull_request.merge_commit_sha, //can use fetchRef.data.object.sha, safer to use PR payload sha
+		  type: 'commit'
+		});
+		const createTag = await createRef('refs/tags/'+tag, createTagObj.data.object.sha);
+		console.log(`Tagging Result: ${createTag}`);
 	}
 	catch (error) {
 	  console.log(`Error Msg: ${error.response.data.message}, Error Info: ${error.request.body}`);
@@ -114,22 +123,4 @@ async function createRef(ref, sha){
 	}
 }
 
-async function linkIssueToPR(pullReqData){
-	try {
-	  	let prBranchToMerge = pullReqData.body.pull_request.head.ref;
-		let prBody = '[closes #' + prBranchToMerge.split('-')[0] + '] ';
-		if (pullReqData.body.pull_request.body != null){
-			prBody = prBody + pullReqData.body.pull_request.body;
-		}
-		const linkIssue = await octokit.request('PATCH /repos/{owner}/{repo}/pulls/{pull_number}', {
-		  owner: owner,
-		  repo: repo,
-		  pull_number: pullReqData.body.number.toString(),
-		  body: prBody
-		});
-		console.log(`PR desc updated with IssueNum to trigger auto-link: ${linkIssue.data.body}`);
-	}
-	catch (error) {
-	  console.log(error);
-	}
-};
+
