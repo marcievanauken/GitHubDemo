@@ -60,7 +60,7 @@ async function tagBranch(e) {
 		  repo: repo,
 		  tag: '1.0.0', // to be variable - calculated based on labels?
 		  message: 'tag main branch',
-		  object: '891ae9e6796b0061bae3fc0e8e60ac7319920974',
+		  object: 'e8268d5807e97ba5385b15a3ff0485daf89094df',
 		  type: 'commit'
 		});
 		console.log("createTagObj")
