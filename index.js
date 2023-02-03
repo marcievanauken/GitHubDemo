@@ -23,18 +23,18 @@ source.onmessage = async (event) => {
 	  let action = event.body.action;
 	  if (event.body.hasOwnProperty("issue") && action == 'assigned'){
 		const branchName = await prepareBranchName(event);
-		createBranch(branchName); // to be createRef()?
+		createBranch(branchName);
+		// create getRef function, use sha as input from createBranch return
 	  }
 	  if (event.body.hasOwnProperty("pull_request") && action == 'opened'){ // assigned:test, opened:actual
 	  	linkIssueToPR(event);
 	  }
 	  if (event.body.hasOwnProperty("pull_request") && action == 'closed'){ 
-	  	// !!test tags endpoint in postman to see if we can use same function for tags and branches!!
-	  	// tagBranch(getLatestTag) createRef(tagBranch)
-	  	tagBranch(event); 
-	  	// might be safer to get it from the closed event though, instead of fetchRef in case of timing issue?
-	  	// don't need to get sha from closed event because the ref for the merged branch is created, and we can use the GET REF method, don't need to pass event
-		}
+	  	// prepareTag() 
+	  	tagBranch(event); // inputs: (pr merge event sha, generated v tag (1.0.1))
+	  	// create getRef function, use sha as input from tagBranch return
+
+	  }
 	}
   	catch (error) {
 	  console.log(error);
@@ -43,8 +43,10 @@ source.onmessage = async (event) => {
 
 function prepareBranchName(issueData){
 	try {
-		let issueNum = issueData.body.issue.number; 
-		let brName = issueNum.toString()+' '+ issueData.body.issue.title; //appending # to link issues to prs and bc dup branch names aren't allowed
+		let issueNum = issueData.body.issue.number;
+		let assignee =  issueData.body.assignee.login;
+		assignee = assignee.slice(0,3);
+		let brName = issueNum.toString()+'-'+assignee+'-'+issueData.body.issue.title; //dup branches not allowed, appending name in case we have multiple assignees to an issue, appending # to link issues to prs
 		brName = brName.replace(/\s+/g, '-').toLowerCase();
 		console.log(`New Issue: ${issueData.body.issue.title}, Assigned To: ${issueData.body.assignee.login}, Assigned By: ${issueData.body.sender.login}`);
 		return brName;
@@ -75,35 +77,44 @@ async function tagBranch(e) {
 		console.log(`Main Branch Tagged: ${createTag.data.ref}`);
 	}
 	catch (error) {
-	  console.log(error.data.message); //reference already exists
+	  console.log(error.response.data.message); //reference already exists
 	}
 };
-
-//change change
 
 async function createBranch(brName) {
 	try {
-		// to test assign unassign and assign in same issue
-		// to test assigning multiple people to issue
-		// to test other characters: apostrophe, period or whatever
-		// pending tests, to check whether branch exists first, then create branch
-		const fetchRef = await octokit.request('GET /repos/{owner}/{repo}/git/ref/{ref}', {
+		let branchExists = false;
+		const checkBranch = await octokit.request('GET /repos/{owner}/{repo}/branches', {
 		  owner: owner,
-		  repo: repo,
-		  ref: 'heads/master'
+		  repo: repo
 		});
-		const createBranch = await octokit.request('POST /repos/{owner}/{repo}/git/refs', {
-		  owner: owner,
-		  repo: repo,
-		  ref: 'refs/heads/'+ brName,
-		  sha: fetchRef.data.object.sha
+		checkBranch.data.forEach((branch) => {
+			if (branch.name == brName) branchExists = true;
 		});
-		console.log(`New Branch Created: ${createBranch.data.ref}`);
+		if (!branchExists){
+			const fetchRef = await octokit.request('GET /repos/{owner}/{repo}/git/ref/{ref}', {
+			  owner: owner,
+			  repo: repo,
+			  ref: 'heads/master'
+			});
+			const createBranch = await createRef('refs/heads/'+ brName, fetchRef.data.object.sha);
+			console.log(`New Branch Created: ${createBranch}`);
+		}
 	}
 	catch (error) {
-	  console.log(error);
+	  console.log(`Error Msg: ${error.response.data.message}, Error Info: ${error.request.body}`); //reference already exists, not a valid ref name (period at end)
 	}
 };
+
+async function createRef(ref, sha){
+	const newRef = await octokit.request('POST /repos/{owner}/{repo}/git/refs', {
+	  owner: owner,
+	  repo: repo,
+	  ref: ref,
+	  sha: sha
+	});
+	return newRef.data.ref
+}
 
 async function linkIssueToPR(pullReqData){
 	try {
@@ -121,6 +132,6 @@ async function linkIssueToPR(pullReqData){
 		console.log(`PR desc updated with IssueNum to trigger auto-link: ${linkIssue.data.body}`);
 	}
 	catch (error) {
-	  console.log(error.data.message); //reference already exists
+	  console.log(error);
 	}
 };
