@@ -28,7 +28,7 @@ source.onmessage = async (event) => {
 	  if (event.body.hasOwnProperty("pull_request") && action == 'opened'){ // assigned:test, opened:actual
 	  	linkIssueToPR(event);
 	  }
-	  if (event.body.hasOwnProperty("pull_request") && action == 'assigned'){ 
+	  if (event.body.hasOwnProperty("pull_request") && action == 'closed'){ 
 	  	// !!test tags endpoint in postman to see if we can use same function for tags and branches!!
 	  	// getLatestTag()
 	  	// tagBranch(getLatestTag) (createRef)
@@ -55,23 +55,25 @@ function prepareBranchName(issueData){
 
 async function tagBranch(e) {
 	try {
-		console.log(e);
-		console.log(e.pull_request.merge_commit_sha);
-
-		// const createTagObj = await octokit.request('POST /repos/{owner}/{repo}/git/tags/{tag}', {
-		//   owner: owner,
-		//   repo: repo,
-		//   tag: '2.0.1' // to calculate based on tags?
-		//   object: e.pull_request.merge_commit_sha
-		//   type: 'commit'
-		// });
-		// const createTag = await octokit.request('POST /repos/{owner}/{repo}/git/refs', {
-		//   owner: owner,
-		//   repo: repo,
-		//   ref: 'refs/heads/'// + createTagObj.tag,
-		//   sha: // createTagObj.sha
-		// });
-		// console.log(`Main Branch Tagged: ${createTag.data.ref}`);
+		const createTagObj = await octokit.request('POST /repos/{owner}/{repo}/git/tags', {
+		  owner: owner,
+		  repo: repo,
+		  tag: '1.0.0', // to be variable - calculated based on labels?
+		  message: 'tag main branch',
+		  object: 'f531426b4de8c486c6e298c4fdaedaa6d3fcaa29',
+		  type: 'commit'
+		});
+		console.log("createTagObj")
+		console.log(createTagObj.data)
+		const createTag = await octokit.request('POST /repos/{owner}/{repo}/git/refs', {
+		  owner: owner,
+		  repo: repo,
+		  ref: 'refs/tags/1.0.1', // to be variable
+		  sha: createTagObj.data.object.sha
+		});
+		console.log("createTag")
+		console.log(createTag.data)
+		console.log(`Main Branch Tagged: ${createTag.data.ref}`);
 	}
 	catch (error) {
 	  console.log(error);
