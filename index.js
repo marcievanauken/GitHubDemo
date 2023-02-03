@@ -21,10 +21,11 @@ source.onmessage = async (event) => {
 	try {
 	  event = JSON.parse(event.data);
 	  let action = event.body.action;
+
 	  if (event.body.hasOwnProperty("issue") && action == 'assigned'){
-		const branchName = await prepareBranchName(event);
-		createBranch(branchName);
-		// create getRef function, use sha as input from createBranch return
+			const branchName = await prepareBranchName(event);
+			createBranch(branchName);
+			// create getRef function, use sha as input from createBranch return
 	  }
 	  if (event.body.hasOwnProperty("pull_request") && action == 'opened'){ // assigned:test, opened:actual
 	  	linkIssueToPR(event);
@@ -61,20 +62,21 @@ async function tagBranch(e) {
 		const createTagObj = await octokit.request('POST /repos/{owner}/{repo}/git/tags', {
 		  owner: owner,
 		  repo: repo,
-		  tag: '1.0.3', // to be variable - calculated based on labels?
+		  tag: '1.0.0', // to be variable - calculated based on labels?
 		  message: 'tag main branch',
 		  object: e.body.pull_request.merge_commit_sha, //can use fetchRef.data.object.sha, safer to use PR payload sha
 		  type: 'commit'
 		});
-		console.log("createTagObj.data.object.sha")
-		console.log(createTagObj.data.object.sha)
-		const createTag = await octokit.request('POST /repos/{owner}/{repo}/git/refs', {
-		  owner: owner,
-		  repo: repo,
-		  ref: 'refs/tags/1.0.3', // to be variable
-		  sha: createTagObj.data.object.sha
-		});
-		console.log(`Main Branch Tagged: ${createTag.data.ref}`);
+
+
+		const createTag = await createRef('refs/tags/1.0.0', createTagObj.data.object.sha);
+		// const createTag = await octokit.request('POST /repos/{owner}/{repo}/git/refs', {
+		//   owner: owner,
+		//   repo: repo,
+		//   ref: 'refs/tags/1.0.0', // to be variable
+		//   sha: createTagObj.data.object.sha
+		// });
+		console.log(`Main Branch Tagged: ${createTag}`);
 	}
 	catch (error) {
 	  console.log(error.response.data.message); //reference already exists
